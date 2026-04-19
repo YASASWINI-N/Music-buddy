@@ -11,19 +11,21 @@
       text-align: center;
     }
 
-    .container {
-      padding: 20px;
-    }
+    .container { padding: 20px; }
+    .hidden { display: none; }
 
-    .hidden {
-      display: none;
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
     }
 
     button {
       margin: 5px;
-      padding: 10px 15px;
-      border: none;
+      padding: 10px;
       border-radius: 8px;
+      border: none;
       background: purple;
       color: white;
       cursor: pointer;
@@ -31,8 +33,8 @@
 
     .card {
       background: #1e293b;
-      margin: 10px;
       padding: 15px;
+      margin: 10px;
       border-radius: 10px;
     }
   </style>
@@ -41,82 +43,132 @@
 
 <div class="container">
 
-  <!-- Home -->
-  <div id="home">
-    <h1> Music Buddy</h1>
-    <p>Find people who vibe with your music</p>
-    <button onclick="goTo('preferences')">Get Started</button>
+  <!-- LOGIN -->
+  <div id="login">
+    <h1>🎧 Music Buddy</h1>
+    <input id="name" placeholder="Name"><br>
+    <input id="age" type="number" placeholder="Age"><br>
+    <select id="profession">
+      <option>Student</option>
+      <option>Working</option>
+    </select><br>
+    <input id="hobbies" placeholder="Hobbies (comma separated)"><br>
+    <button onclick="goToPreferences()">Continue</button>
   </div>
 
-  <!-- Preferences -->
+  <!-- PREFERENCES -->
   <div id="preferences" class="hidden">
-    <h2>Select Your Music Taste</h2>
-    <div id="options">
-      <button onclick="toggle(this)">Melody</button>
-      <button onclick="toggle(this)">Romantic</button>
-      <button onclick="toggle(this)">Sad Songs</button>
-      <button onclick="toggle(this)">Telugu</button>
-      <button onclick="toggle(this)">Lofi</button>
-    </div>
-    <br>
-    <button onclick="showMatches()">Find Buddies</button>
+    <h2>Select Music Preferences</h2>
+    <select id="music" multiple>
+      <option>Melody</option>
+      <option>Romantic</option>
+      <option>Sad Songs</option>
+      <option>Lo-fi</option>
+      <option>Telugu</option>
+      <option>Bollywood</option>
+      <option>English</option>
+    </select><br>
+    <button onclick="findMatches()">Find Matches</button>
   </div>
 
-  <!-- Matches -->
+  <!-- MATCHES -->
   <div id="matches" class="hidden">
-    <h2>Your Music Buddies</h2>
+    <h2>Your Matches</h2>
     <div id="matchList"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat" class="hidden">
+    <h2>Chat Room</h2>
+    <div class="card">Hi! Start conversation 🎵</div>
+    <button onclick="goTo('matches')">Back</button>
+  </div>
+
+  <!-- VOICE -->
+  <div id="voice" class="hidden">
+    <h2>Voice Room 🎙️</h2>
+    <div class="card">Playing Songs:</div>
+    <div id="songs"></div>
+    <button onclick="goTo('matches')">Back</button>
   </div>
 
 </div>
 
 <script>
-  let selected = [];
+let currentUser = {};
+let selectedMusic = [];
 
-  const users = [
-    { name: "Ananya", interests: ["Melody", "Romantic"] },
-    { name: "Rahul", interests: ["Lofi", "Sad Songs"] },
-    { name: "Sneha", interests: ["Melody", "Classical"] },
-    { name: "Arjun", interests: ["Telugu", "Romantic"] }
-  ];
+const users = [
+  { name: "Ananya", age: 21, profession: "Student", hobbies: ["Singing"], interests: ["Melody", "Romantic"] },
+  { name: "Rahul", age: 23, profession: "Working", hobbies: ["Gaming"], interests: ["Lo-fi", "Sad Songs"] },
+  { name: "Sneha", age: 20, profession: "Student", hobbies: ["Reading"], interests: ["Melody"] },
+  { name: "Arjun", age: 25, profession: "Working", hobbies: ["Travel"], interests: ["Telugu", "Romantic"] }
+];
 
-  function goTo(page) {
-    document.getElementById('home').classList.add('hidden');
-    document.getElementById('preferences').classList.add('hidden');
-    document.getElementById('matches').classList.add('hidden');
+const songs = [
+  "Perfect - Ed Sheeran",
+  "Tum Hi Ho - Arijit Singh",
+  "Samajavaragamana",
+  "Let Her Go",
+  "Kesariya"
+];
 
-    document.getElementById(page).classList.remove('hidden');
+function goTo(page) {
+  ["login","preferences","matches","chat","voice"].forEach(p => {
+    document.getElementById(p).classList.add("hidden");
+  });
+  document.getElementById(page).classList.remove("hidden");
+}
+
+function goToPreferences() {
+  const name = document.getElementById("name").value;
+  const age = parseInt(document.getElementById("age").value);
+  const profession = document.getElementById("profession").value;
+  const hobbies = document.getElementById("hobbies").value.split(",");
+
+  if (age < 16) {
+    alert("Minimum age is 16");
+    return;
   }
 
-  function toggle(btn) {
-    const value = btn.innerText;
+  currentUser = { name, age, profession, hobbies };
+  goTo("preferences");
+}
 
-    if (selected.includes(value)) {
-      selected = selected.filter(i => i !== value);
-      btn.style.background = "purple";
-    } else {
-      selected.push(value);
-      btn.style.background = "green";
+function findMatches() {
+  const options = document.getElementById("music").selectedOptions;
+  selectedMusic = Array.from(options).map(o => o.value);
+
+  goTo("matches");
+
+  const list = document.getElementById("matchList");
+  list.innerHTML = "";
+
+  users.forEach(user => {
+    let match = user.interests.filter(i => selectedMusic.includes(i)).length;
+
+    if (match > 0) {
+      let div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <h3>${user.name}</h3>
+        <p>Age: ${user.age}</p>
+        <p>${user.profession}</p>
+        <p>Hobbies: ${user.hobbies.join(",")}</p>
+        <p>Interests: ${user.interests.join(",")}</p>
+        <button onclick="goTo('chat')">❤️ Chat</button>
+        <button onclick="openVoice()">📞 Voice</button>
+      `;
+      list.appendChild(div);
     }
-  }
+  });
+}
 
-  function showMatches() {
-    goTo('matches');
-
-    const list = document.getElementById('matchList');
-    list.innerHTML = "";
-
-    users.forEach(user => {
-      let matchScore = user.interests.filter(i => selected.includes(i)).length;
-
-      if (matchScore > 0) {
-        let div = document.createElement('div');
-        div.className = "card";
-        div.innerHTML = `${user.name} - Match Score: ${matchScore}`;
-        list.appendChild(div);
-      }
-    });
-  }
+function openVoice() {
+  goTo("voice");
+  const s = document.getElementById("songs");
+  s.innerHTML = songs.map(song => `<div class="card">${song}</div>`).join("");
+}
 </script>
 
 </body>
