@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Music Buddy</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(to right, #0f172a, #1e293b);
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: purple;
+      color: white;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #1e293b;
+      margin: 10px;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Home -->
+  <div id="home">
+    <h1>🎧 Music Buddy</h1>
+    <p>Find people who vibe with your music</p>
+    <button onclick="goTo('preferences')">Get Started</button>
+  </div>
+
+  <!-- Preferences -->
+  <div id="preferences" class="hidden">
+    <h2>Select Your Music Taste</h2>
+    <div id="options">
+      <button onclick="toggle(this)">Melody</button>
+      <button onclick="toggle(this)">Romantic</button>
+      <button onclick="toggle(this)">Sad Songs</button>
+      <button onclick="toggle(this)">Telugu</button>
+      <button onclick="toggle(this)">Lofi</button>
+    </div>
+    <br>
+    <button onclick="showMatches()">Find Buddies</button>
+  </div>
+
+  <!-- Matches -->
+  <div id="matches" class="hidden">
+    <h2>Your Music Buddies</h2>
+    <div id="matchList"></div>
+  </div>
+
+</div>
+
+<script>
+  let selected = [];
+
+  const users = [
+    { name: "Ananya", interests: ["Melody", "Romantic"] },
+    { name: "Rahul", interests: ["Lofi", "Sad Songs"] },
+    { name: "Sneha", interests: ["Melody", "Classical"] },
+    { name: "Arjun", interests: ["Telugu", "Romantic"] }
+  ];
+
+  function goTo(page) {
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('preferences').classList.add('hidden');
+    document.getElementById('matches').classList.add('hidden');
+
+    document.getElementById(page).classList.remove('hidden');
+  }
+
+  function toggle(btn) {
+    const value = btn.innerText;
+
+    if (selected.includes(value)) {
+      selected = selected.filter(i => i !== value);
+      btn.style.background = "purple";
+    } else {
+      selected.push(value);
+      btn.style.background = "green";
+    }
+  }
+
+  function showMatches() {
+    goTo('matches');
+
+    const list = document.getElementById('matchList');
+    list.innerHTML = "";
+
+    users.forEach(user => {
+      let matchScore = user.interests.filter(i => selected.includes(i)).length;
+
+      if (matchScore > 0) {
+        let div = document.createElement('div');
+        div.className = "card";
+        div.innerHTML = `${user.name} - Match Score: ${matchScore}`;
+        list.appendChild(div);
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
